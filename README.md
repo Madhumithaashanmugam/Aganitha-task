@@ -60,19 +60,32 @@ I**nstall Dpendances:**
 poetry install
 
 ## File strucer:
+
 ![alt text](image.png)
+
 **run project**
+
 poetry run python src/pubmed_research/main.py
+
 ![alt text](image-1.png)
+
 Enter the search query in my case it is office
+
 when you hit enter the updated data will be stored in the csv file
 
 or if you want to store that in diffent file you can go with command.
+
 poetry run python src/pubmed_research/fetch_papers.py
+
+
 ![alt text](image-2.png)
+
 Here it we need to give the input of query search
-again it will ask about debug mode we want to select y/n
+
+again it will ask about debug mode we want to select yes/no
+
 and it will as about the file save details.
+
 ![alt text](image-3.png)
 
 
