@@ -1,9 +1,7 @@
-import argparse
 import requests
 from typing import List, Dict
 import pandas as pd
 import xml.etree.ElementTree as ET
-
 
 def fetch_papers(query: str, max_results: int = 10) -> List[str]:
     base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
@@ -21,7 +19,6 @@ def fetch_papers(query: str, max_results: int = 10) -> List[str]:
     data = response.json()
     return data["esearchresult"]["idlist"]
 
-
 def fetch_paper_details(pubmed_ids: List[str], debug: bool = False) -> List[Dict]:
     if not pubmed_ids:
         return []
@@ -38,8 +35,8 @@ def fetch_paper_details(pubmed_ids: List[str], debug: bool = False) -> List[Dict
         raise Exception("Error fetching paper details from PubMed API")
 
     root = ET.fromstring(response.text)
-
     results = []
+
     for article in root.findall(".//PubmedArticle"):
         pmid_element = article.find(".//PMID")
         pmid = pmid_element.text if pmid_element is not None else "N/A"
@@ -86,25 +83,20 @@ def fetch_paper_details(pubmed_ids: List[str], debug: bool = False) -> List[Dict
 
     return results
 
-
 def save_to_csv(data: List[Dict], filename: str):
     df = pd.DataFrame(data)
     df.to_csv(filename, index=False)
     print(f"Results saved to {filename}")
 
-
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Fetch and filter PubMed research papers.")
-    parser.add_argument("query", type=str, help="Search query for PubMed")
-    parser.add_argument("-d", "--debug", action="store_true", help="Print debug information")
-    parser.add_argument("-f", "--file", type=str, help="Specify the filename to save results (default: print to console)")
+    query = input("Enter your search query: ").strip()
+    debug_mode = input("Enable debug mode? (yes/no): ").strip().lower() == "yes"
+    file_name = input("Enter filename to save results (press Enter to display on screen): ").strip()
 
-    args = parser.parse_args()
+    pubmed_ids = fetch_papers(query)
+    details = fetch_paper_details(pubmed_ids, debug=debug_mode)
 
-    pubmed_ids = fetch_papers(args.query)
-    details = fetch_paper_details(pubmed_ids, debug=args.debug)
-
-    if args.file:
-        save_to_csv(details, args.file)
+    if file_name:
+        save_to_csv(details, file_name)
     else:
         print(details)

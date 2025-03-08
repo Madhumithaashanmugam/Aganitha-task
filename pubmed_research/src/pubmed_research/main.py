@@ -1,28 +1,37 @@
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
 import argparse
 from pubmed_research.fetch_papers import fetch_papers, fetch_paper_details, save_to_csv
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Fetch PubMed papers based on a query")
-    parser.add_argument("query", type=str, help="Search query")
-    parser.add_argument("-f", "--file", type=str, help="Output CSV filename", default="pubmed_results.csv")
-    parser.add_argument("-d", "--debug", action="store_true", help="Enable debug mode")
+   
+    query = input("Enter your search query: ").strip()
+    debug_mode = input("Enable debug mode? (yes/no): ").strip().lower() == "yes"
+    file_name = input("Enter filename to save results (press Enter to display on screen): ").strip()
 
-    args = parser.parse_args()
+    if debug_mode:
+        print(f"DEBUG: Query: {query}")
+        if file_name:
+            print(f"DEBUG: Output File: {file_name}")
+        else:
+            print(f"DEBUG: No file specified, displaying results on screen")
 
-    if args.debug:
-        print(f"DEBUG: Query: {args.query}")
-        print(f"DEBUG: Output File: {args.file}")
+    try:
+        pubmed_ids = fetch_papers(query)
+        if debug_mode:
+            print(f"DEBUG: Found {len(pubmed_ids)} papers: {pubmed_ids}")
 
-    pubmed_ids = fetch_papers(args.query)
-    if args.debug:
-        print(f"DEBUG: Found {len(pubmed_ids)} papers")
+        details = fetch_paper_details(pubmed_ids, debug=debug_mode)
+        if debug_mode:
+            print("DEBUG: Processed Papers:")
+            for paper in details:
+                print(paper) 
 
-    details = fetch_paper_details(pubmed_ids)
-    if args.debug:
-        print(f"DEBUG: Processed {len(details)} papers")
+        if file_name:
+            save_to_csv(details, file_name)
+            print(f"Results saved to {file_name}")
+        else:
+            print("\nFetched Paper Details:")
+            for paper in details:
+                print(paper)  
 
-    save_to_csv(details, args.file)
+    except Exception as e:
+        print(f"Error occurred: {e}")
